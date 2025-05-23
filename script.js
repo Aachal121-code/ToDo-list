@@ -6,7 +6,7 @@ let input=document.querySelector(".input")
         }else{
             let newitem=document.createElement("li");
 
-            newitem.innerHTML = `${input.value}<i id="i2" class="fa-solid fa-trash">`;
+            newitem.innerHTML = `${input.value}<i id="i1" class="fa fa-pencil" aria-hidden="true"></i><i id="i2" class="fa-solid fa-trash">`;
             item.appendChild(newitem)
             input.value="" ;
 
@@ -23,26 +23,23 @@ let input=document.querySelector(".input")
             }
             })
 
-            newitem.querySelector("#i1").addEventListener("click",function(){
-                let todolistitem=document.querySelectorAll('.item')
-                todolistitem.forEach((item,index)=>{
-                    item.id=`newitem-${index}`;
-                });
-                function edititem(event){
-                    let todoitemid=event.target.parentNode.id;
-                    let todoitem=document.getElementById(todoitemid);
-                    let todoitemtext=todoitem.textContent;
-                    let textinput=document.createElement('input');
-                    textinput.type='text';
-                    textinput.value=todoitemtext;
-                    todoitem.parentNode.removeChild(textinput,todoitem)
-                    textinput.addEventListener('blur',()=>{
-                        let newtodoitemtext=textinput.value;
-                        let newtodoitem=document.createElement('span');
-                        newtodoitem.textContent=newtodoitemtext;
-                        textinput.parentNode.replaceChild(newtodoitem,textinput);
-                    })
-                }
-            })
-        }
-    }
+            newitem.querySelector("#i1").addEventListener("click", edititem);
+
+function edititem(event){
+    let todoitem = event.target.parentNode;
+    let todoitemtext = todoitem.firstChild.textContent;
+    let textinput = document.createElement('input');
+    textinput.type = 'text';
+    textinput.value = todoitemtext;
+
+    // Replace the todo item text with the input box
+    todoitem.replaceChild(textinput, todoitem.firstChild);
+
+    textinput.addEventListener('blur', () => {
+        let newtodoitemtext = textinput.value;
+        let newtodoitem = document.createTextNode(newtodoitemtext);
+        todoitem.replaceChild(newtodoitem, textinput);
+    });
+}
+}
+}
