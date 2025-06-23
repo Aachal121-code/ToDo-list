@@ -1,45 +1,105 @@
-let input=document.querySelector(".input")
-    let item=document.querySelector(".item")
-    function Add(){
-        if(input.value==""){
-            alert("please enter task")
-        }else{
-            let newitem=document.createElement("li");
+const input = document.querySelector(".input");
+const itemList = document.querySelector(".item");
+const API_URL = 'http://localhost:3000/api/todos';
 
-            newitem.innerHTML = `${input.value}<i id="i1" class="fa fa-pencil" aria-hidden="true"></i><i id="i2" class="fa-solid fa-trash">`;
-            item.appendChild(newitem)
-            input.value="" ;
+// Load all todos on page load
+window.onload = fetchTodos;
 
-            newitem.querySelector("#i2").addEventListener("click",remove)
-            function remove(){
-                newitem.remove()
-            }
-    
-            newitem.addEventListener("click",function(){
-            if(newitem.style.textDecoration=="none"){
-                newitem.style.textDecoration="line-through"
-            }else{
-                newitem.style.textDecoration="none"
-            }
-            })
+async function fetchTodos() {
+    const res = await fetch(API_URL);
+    const todos = await res.json();
+    itemList.innerHTML = ''; // Clear old items
+    todos.forEach(todo => renderTodo(todo));
+}
 
-            newitem.querySelector("#i1").addEventListener("click", edititem);
+function renderTodo(todo) {
+    const li = document.createElement("li");
+    li.dataset.id = todo._id;
+    li.style.textDecoration = todo.completed ? "line-through" : "none";
+    li.innerHTML = `
+        ${todo.text}
+        <i id="i1" class="fa fa-pencil"></i>
+        <i id="i2" class="fa fa-trash"></i>
+    `;
+    itemList.appendChild(li);
 
-function edititem(event){
-    let todoitem = event.target.parentNode;
-    let todoitemtext = todoitem.firstChild.textContent;
-    let textinput = document.createElement('input');
-    textinput.type = 'text';
-    textinput.value = todoitemtext;
-
-    // Replace the todo item text with the input box
-    todoitem.replaceChild(textinput, todoitem.firstChild);
-
-    textinput.addEventListener('blur', () => {
-        let newtodoitemtext = textinput.value;
-        let newtodoitem = document.createTextNode(newtodoitemtext);
-        todoitem.replaceChild(newtodoitem, textinput);
+    li.querySelector("#i2").addEventListener("click", () => deleteTodo(todo._id));
+    li.querySelector("#i1").addEventListener("click", () => editTodo(todo));
+    li.addEventListener("click", (e) => {
+        if (!["I", "i"].includes(e.target.tagName)) {
+            toggleComplete(todo);
+        }
     });
 }
+
+async function Add() {
+    if (input.value.trim() === "") {
+        alert("Please enter task");
+        return;
+    }
+
+    const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: input.value })
+    });
+
+    const newTodo = await res.json();
+    renderTodo(newTodo);
+    input.value = "";
 }
+
+async function deleteTodo(id) {
+    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+    document.querySelector(`li[data-id='${id}']`).remove();
+}
+
+async function toggleComplete(todo) {
+    const updatedTodo = {
+        ...todo,
+        completed: !todo.completed
+    };
+
+    const res = await fetch(`${API_URL}/${todo._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedTodo)
+    });
+
+    const data = await res.json();
+    const li = document.querySelector(`li[data-id='${todo._id}']`);
+    li.style.textDecoration = data.completed ? "line-through" : "none";
+}
+
+function editTodo(todo) {
+    const li = document.querySelector(`li[data-id='${todo._id}']`);
+    const inputBox = document.createElement("input");
+    inputBox.type = "text";
+    inputBox.value = todo.text;
+
+    li.innerHTML = '';
+    li.appendChild(inputBox);
+    inputBox.focus();
+
+    inputBox.addEventListener("blur", async () => {
+        const newText = inputBox.value;
+        const updated = { ...todo, text: newText };
+
+        const res = await fetch(`${API_URL}/${todo._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updated)
+        });
+
+        const updatedTodo = await res.json();
+        li.innerHTML = `
+            ${updatedTodo.text}
+            <i id="i1" class="fa fa-pencil"></i>
+            <i id="i2" class="fa fa-trash"></i>
+        `;
+        li.style.textDecoration = updatedTodo.completed ? "line-through" : "none";
+
+        li.querySelector("#i2").addEventListener("click", () => deleteTodo(updatedTodo._id));
+        li.querySelector("#i1").addEventListener("click", () => editTodo(updatedTodo));
+    });
 }
