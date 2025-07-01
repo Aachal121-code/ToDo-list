@@ -46,24 +46,24 @@ todo-app/
 
 ## 🚀 Getting Started
 
-### 1. Clone the Repository
+1. Clone the Repository
 
 ```bash
 git clone https://github.com/your-username/todolist-backend.git
 cd todolist-backend
 
-### 2. Install Dependencies
+2. Install Dependencies
 bash
 npm install
 
 
-### 3. Create Environment Variables
+3. Create Environment Variables
 Create a .env file in the root directory and add the following:
 env
 MONGO_URI=mongodb://localhost:27017/todolist
 PORT=3000
 
-### 4. Start the Server
+4. Start the Server
 bash
 node server.js
 
