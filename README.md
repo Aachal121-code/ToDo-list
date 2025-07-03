@@ -40,7 +40,8 @@ todo-app/
 
 ---
 ## screenshots
-ToDo list : ![image](https://github.com/user-attachments/assets/115c5238-a913-466f-86bf-b16e37b580fd)
+ToDo list :
+![image](https://github.com/user-attachments/assets/115c5238-a913-466f-86bf-b16e37b580fd)
 
 ## ⚙️ Setup Instructions
 
